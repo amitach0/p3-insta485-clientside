@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>insta485</title>
+  </head>
+  <body>
+    <h2><a href="/">Link</a></h2>
+    <h2><a href="/explore/">explore</a></h2>
+    <h2><a href="/users/{{logname}}/">{{logname}}</a></h2>
+    {% for post in posts %}
+    <a href="/users/{{post['owner']}}/"
+      ><img src="/uploads/{{post['owner_img_url']}}" alt=""
+    /></a>
+    <h2><a href="/users/{{post['owner']}}/">{{post['owner']}}</a></h2>
+    <h2><a href="/posts/{{post['postid']}}/">{{post['timestamp']}}</a></h2>
+    <img src="/uploads/{{post['img_url']}}" alt="picture" />
+    {% if post['likes'] == 1 %}
+    <h2>{{post['likes']}} like</h2>
+    {% else %}
+    <h2>{{post['likes']}} likes</h2>
+    {% endif %} {% for comment in post['comments'] %}
+    <h2>
+      <a href="/users/{{comment['owner']}}/">{{comment['owner']}}</a>
+      {{comment['text']}}
+    </h2>
+    {% endfor %} {% if post['like_flag'] == 'true' %}
+    <form
+      action="/likes/?target={{url_for('show_index')}}"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <input type="hidden" name="operation" value="unlike" />
+      <input type="hidden" name="postid" value="{{post['postid']}}" />
+      <input type="submit" name="unlike" value="unlike" />
+    </form>
+    {% else %}
+    <form
+      action="/likes/?target={{url_for('show_index')}}"
+      ?target="/"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <input type="hidden" name="operation" value="like" />
+      <input type="hidden" name="postid" value="{{post['postid']}}" />
+      <input type="submit" name="like" value="like" />
+    </form>
+    {% endif %}
+
+    <form
+      action="/comments/?target={{url_for('show_index')}}"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <input type="hidden" name="operation" value="create" />
+      <input type="hidden" name="postid" value="{{post['postid']}}" />
+      <input type="text" name="text" required />
+      <input type="submit" name="comment" value="comment" />
+    </form>
+
+    {% endfor %}
+  </body>
+</html>

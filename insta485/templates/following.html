@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>insta485</title>
+  </head>
+  <body>
+    <h2><a href="/">Link</a></h2>
+    <h2><a href="/explore/">explore</a></h2>
+    <h2><a href="/users/{{logname}}/">{{logname}}</a></h2>
+    <h1><b>Following</b></h1>
+    {% for follow in following %}
+    <div>
+      <img src="/uploads/{{follow['user_img_url']}}" alt="" />
+      <h2>
+        <a href="/users/{{follow['username']}}/">{{follow['username']}}</a>
+      </h2>
+      {% if logname == follow['username'] %}
+      <h2></h2>
+      {% elif follow['logname_follows_username'] == true %}
+      <h2>following</h2>
+      <form
+        action="/following/?target=/users/{{user_url_slug}}/following"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <input type="submit" name="unfollow" value="unfollow" />
+        <input type="hidden" name="username" value="{{follow['username']}}" />
+        <input type="hidden" name="operation" value="unfollow" />
+      </form>
+      {% elif follow['logname_follows_username'] == false %}
+      <h2>not following</h2>
+      <form
+        action="/following/?target=/users/{{user_url_slug}}/following"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <input type="submit" name="follow" value="follow" />
+        <input type="hidden" name="username" value="{{follow['username']}}" />
+        <input type="hidden" name="operation" value="follow" />
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </body>
+</html>

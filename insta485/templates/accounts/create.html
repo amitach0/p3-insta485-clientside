@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>insta485</title>
+  </head>
+  <body>
+    <h2><a href="/">Link</a></h2>
+    <h2><a href="/accounts/login/">Login</a></h2>
+        <form action="/accounts/?target={{url_for('show_index')}}" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" required/>
+            <input type="text" name="fullname" required/>
+            <input type="text" name="username" required/>
+            <input type="text" name="email" required/>
+            <input type="password" name="password" required/>
+            <input type="submit" name="signup" value="sign up"/>
+            <input type="hidden" name="operation" value="create"/>
+        </form>
+    <h2>Have an account? <a href="/accounts/create/"><b>Log in</b></a></h2>
+  </body>
+</html>
