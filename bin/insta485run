@@ -5,5 +5,10 @@
 set -Eeuo pipefail
 set -x
 
-./bin/insta485db create
-flask --app insta485 --debug run --host 0.0.0.0 --port 8000
+FILE=var/insta485.sqlite3
+if [ -f "$FILE" ]; then
+    flask --app insta485 --debug run --host 0.0.0.0 --port 8000
+else 
+    exit 1
+fi
+
