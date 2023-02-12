@@ -1,6 +1,42 @@
 """REST API for posts."""
 import flask
+import hashlib
 import insta485
+
+
+# HELPER FUNCTIONS
+def authentication():
+  if 'username' in flask.session:
+    logname = flask.session['username']
+  else:
+    if flask.request.authorization: 
+      logname = flask.request.authorization['username']
+      password = flask.request.authorization['password']
+    else:
+      return flask.abort(403)
+
+    algorithm = 'sha512'
+    salt = 'a45ffdcc71884853a2cba9e6bc55e812'
+    hash_obj = hashlib.new(algorithm)
+    password_salted = salt + password
+    hash_obj.update(password_salted.encode('utf-8'))
+    password_hash = hash_obj.hexdigest()
+    password_db_string = "$".join([algorithm, salt, password_hash])
+
+    connection = insta485.model.get_db()
+    cur = connection.execute(
+      "SELECT username, password "
+      "FROM users "
+      "WHERE username = ? AND password = ? ",
+      (logname, password_db_string)
+    )
+    is_valid = len(cur.fetchall())
+    if is_valid is 1:
+      return logname
+    else:
+      print("ABORTING")
+      return flask.abort(403)
+  return logname
 
 
 @insta485.app.route('/api/v1/')
@@ -19,7 +55,12 @@ def get_api():
 @insta485.app.route('/api/v1/posts/')
 def get_posts():
   """Return the 10 newest posts."""
-  logname = flask.session['username']
+
+  # HTTP Basic Access Authentication  
+  #logname = flask.request.authorization['username']
+  #password = flask.request.authorization['password']
+
+  logname = authentication()
   connection = insta485.model.get_db()
   
   cur = connection.execute(
@@ -51,7 +92,7 @@ def get_posts():
   context = {"next": "", "results": []}
   print("DEBUG:", postids)
   for post in postids:
-    curr_post = {'postid': post['postid'], 'url': '/api/v1/posts/{}/'.format(post['postid'])}
+    curr_post = {'postid': post['postid'], 'url': '/api/v1/posts/{}/'.format(int(post['postid']))}
     context['results'].append(curr_post)
   
   context['url'] = '/api/v1/posts/'
@@ -60,27 +101,68 @@ def get_posts():
 
 @insta485.app.route('/api/v1/posts/<int:postid_url_slug>/')
 def get_post(postid_url_slug):
-    # CHANGE THIS TO NOT BE HARD CODED
-    """Return post on postid.
+    """Return post on postid"""
 
-    Example:
-    {
-    "created": "2017-09-28 04:33:28",
-    "imgUrl": "/uploads/122a7d27ca1d7420a1072f695d9290fad4501a41.jpg",
-    "owner": "awdeorio",
-    "ownerImgUrl": "/uploads/e1a7c5c32973862ee15173b0259e3efdb6a391af.jpg",
-    "ownerShowUrl": "/users/awdeorio/",
-    "postShowUrl": "/posts/1/",
-    "url": "/api/v1/posts/1/"
-    }
-    """
-    context = {
-      "created": "2017-09-28 04:33:28",
-      "imgUrl": "/uploads/122a7d27ca1d7420a1072f695d9290fad4501a41.jpg",
-      "owner": "awdeorio",
-      "ownerImgUrl": "/uploads/e1a7c5c32973862ee15173b0259e3efdb6a391af.jpg",
-      "ownerShowUrl": "/users/awdeorio/",
-      "postid": "/posts/{}/".format(postid_url_slug),
-      "url": flask.request.path,
-    }
+    logname = authentication()
+    connection = insta485.model.get_db()
+
+    #logname = flask.request.authorization['username']
+    #password = flask.request.authorization['password']
+
+    cur = connection.execute(
+      "SELECT commentid, owner, text "
+      "FROM comments "
+      "WHERE postid = ? "
+      " ORDER BY commentid ", 
+      (postid_url_slug,)
+    )
+
+    comments = cur.fetchall()
+
+    for comment in comments:
+      if comment['owner'] == logname:
+        comment['lognameOwnsThis'] = True
+      else:
+        comment['lognameOwnsThis'] = False
+      
+      comment['ownerShowUrl'] = '/users/{}/'.format(comment['owner'])
+      comment['url'] = '/api/v1/comments/{}/'.format(comment['commentid'])
+
+    # ADD LIKES DETAILS
+
+    context = {'comments': comments}
+    return flask.jsonify(**context)
+
+
+@insta485.app.route("/api/v1/likes/?postid=<postid>", methods=['POST'])
+def post_likes(postid):
+  logname = authentication()
+  print("DEBUG:", flask.session)
+  connection = insta485.model.get_db()
+
+  cur = connection.execute(
+    "SELECT likeid "
+    "FROM likes "
+    "WHERE postid = ? AND owner = ? ",
+    (postid, logname)
+  )
+  likeid = cur.fetchall()
+  if len(likeid) == 0:
+    connection.execute(
+      "INSERT INTO likes (owner, postid, created) "
+      "VALUES (?, ?, CURRENT_TIMESTAMP ",
+      (logname, postid)
+    )
+
+    cur = connection.execute(
+    "SELECT likeid "
+    "FROM likes "
+    "WHERE postid = ? AND owner = ? ",
+    (postid, logname)
+    )
+    likeid = cur.fetchall()
+    context = {'likeid':likeid[0]['likeid'], 'url':'/api/v1/likes/{}/'.format(likeid[0]['likeid'])}
+    return flask.jsonify(**context), 201
+  else:
+    context = {'likeid':likeid[0]['likeid'], 'url':'/api/v1/likes/{}/'.format(likeid[0]['likeid'])}
     return flask.jsonify(**context)
