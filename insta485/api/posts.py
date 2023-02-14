@@ -31,7 +31,7 @@ def authentication():
       (logname, password_db_string)
     )
     is_valid = len(cur.fetchall())
-    if is_valid is 1:
+    if is_valid == 1:
       return logname
     else:
       print("ABORTING")
@@ -84,7 +84,7 @@ def get_posts():
     "WHERE U.username = ? "
     "GROUP BY P.postid, F.username2, "
     "U2.filename, P.filename, P.created) "
-    "ORDER BY timestamp, postid DESC",
+    "ORDER BY timestamp, postid DESC ",
     (logname, logname)
   )
   postids = cur.fetchall()
@@ -128,17 +128,63 @@ def get_post(postid_url_slug):
       comment['ownerShowUrl'] = '/users/{}/'.format(comment['owner'])
       comment['url'] = '/api/v1/comments/{}/'.format(comment['commentid'])
 
-    # ADD LIKES DETAILS
-
     context = {'comments': comments}
+    context['comments_url'] = '/api/v1/comments/?postid={}'.format(postid_url_slug)
+
+    # Post and owner details
+    cur = connection.execute(
+      "SELECT P.created, P.filename as imgUrl, P.owner, U.filename as ownerImgUrl "
+      "FROM posts P "
+      "INNER JOIN users U ON P.owner = U.username "
+      "WHERE P.postid = ? ",
+      (postid_url_slug,)
+    )
+    post_dets = cur.fetchall()
+    context['created'] = post_dets[0]['created']
+    context['imgUrl'] = '/uploads/{}'.format(post_dets[0]['imgUrl'])
+    # Likes details - check if logname liked post
+    cur = connection.execute(
+      "SELECT likeid "
+    "FROM likes "
+    "WHERE postid = ? AND owner = ? ",
+    (postid_url_slug, logname)
+    )
+    likeid = cur.fetchall()
+
+    # Get total number of likes
+    cur = connection.execute(
+      "SELECT COUNT(*) "
+    "FROM likes "
+    "WHERE postid = ? ",
+    (postid_url_slug,)
+    )
+    num_likes = cur.fetchall()
+    if len(likeid) != 0:
+      context['likes'] = {'lognameLikesThis': True, "numLikes": num_likes[0]['COUNT(*)'], 
+                          'url': '/api/v1/likes/{}/'.format(likeid[0]['likeid'])}
+    else:
+      context['likes'] = {'lognameLikesThis': False, "numLikes": num_likes[0]['COUNT(*)'], 
+                          'url': None}
+
+    # Post and owner details cont.
+    context['owner'] = post_dets[0]['owner']
+    context['ownerImgUrl'] = '/uploads/{}'.format(post_dets[0]['ownerImgUrl'])
+    context['ownerShowUrl'] = '/users/{}/'.format(post_dets[0]['owner'])
+    context['postShowUrl'] = '/posts/{}/'.format(postid_url_slug)
+    context['postid'] = postid_url_slug
+    context['url'] = '/api/v1/posts/{}/'.format(postid_url_slug)
+
     return flask.jsonify(**context)
 
 
-@insta485.app.route("/api/v1/likes/?postid=<postid>", methods=['POST'])
-def post_likes(postid):
+@insta485.app.route("/api/v1/likes/", methods=['POST'])
+def post_likes():
+  """Post likeid."""
+  # ?postid=<postid>
   logname = authentication()
-  print("DEBUG:", flask.session)
   connection = insta485.model.get_db()
+
+  postid = flask.request.args.get('postid')
 
   cur = connection.execute(
     "SELECT likeid "
@@ -147,10 +193,11 @@ def post_likes(postid):
     (postid, logname)
   )
   likeid = cur.fetchall()
+  print(likeid)
   if len(likeid) == 0:
     connection.execute(
       "INSERT INTO likes (owner, postid, created) "
-      "VALUES (?, ?, CURRENT_TIMESTAMP ",
+      "VALUES (?, ?, CURRENT_TIMESTAMP) ",
       (logname, postid)
     )
 
@@ -164,5 +211,6 @@ def post_likes(postid):
     context = {'likeid':likeid[0]['likeid'], 'url':'/api/v1/likes/{}/'.format(likeid[0]['likeid'])}
     return flask.jsonify(**context), 201
   else:
+    print("DEBUG: 200")
     context = {'likeid':likeid[0]['likeid'], 'url':'/api/v1/likes/{}/'.format(likeid[0]['likeid'])}
     return flask.jsonify(**context)

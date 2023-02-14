@@ -10,4 +10,4 @@ const root = createRoot(document.getElementById("reactEntry"));
 root.render(<Post url="/api/v1/posts/1/" />);
 root.render(<Post url="/api/v1/" />);
 root.render(<Post url="/api/v1/posts/" />);
-root.render(<Post url="/api/v1/likes/?postid=<postid>" />);
+root.render(<Post url="/api/v1/likes/" />);
