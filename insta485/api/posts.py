@@ -85,6 +85,7 @@ def get_posts():
     "GROUP BY P.postid, F.username2, "
     "U2.filename, P.filename, P.created) "
     "ORDER BY timestamp, postid DESC ",
+    "LIMIT 10 ", # Test if this actually restrains to first 10
     (logname, logname)
   )
   postids = cur.fetchall()
@@ -214,3 +215,93 @@ def post_likes():
     print("DEBUG: 200")
     context = {'likeid':likeid[0]['likeid'], 'url':'/api/v1/likes/{}/'.format(likeid[0]['likeid'])}
     return flask.jsonify(**context)
+
+@insta485.app.route('/api/v1/likes/<int:likeid>/',  methods=['DELETE'])
+def delete_like(likeid):
+    
+    logname = authentication()
+    connection = insta485.model.get_db()
+
+    cur = connection.execute(
+      "SELECT likeid, owner "
+      "FROM likes "
+      "WHERE likeid = ?",
+      (likeid,)
+    )
+
+    like = cur.fetchall()
+    
+    if len(like) == 0:
+      flask.abort(404)
+    
+
+    if like[0]['owner'] != logname:
+      flask.abort(403)
+
+    connection.execute(
+      "DELETE FROM likes WHERE likeid = ?",
+      (likeid,)
+    )
+
+    
+    return flask.jsonify({}), 204
+
+
+@insta485.app.route('/api/v1/comments/',  methods=['POST'])
+def post_comment():
+  
+  postid = flask.request.args.get('postid')
+  logname = authentication()
+  connection = insta485.model.get_db()
+
+  text = flask.request.json.get("text", None)
+
+  connection.execute(
+    "INSERT INTO comments (owner, postid, text, created) "
+    "VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
+    (logname, postid, text)
+  )
+
+  cur = connection.execute("SELECT last_insert_rowid()")
+  id = cur.fetchall()[0]['last_insert_rowid()']
+  
+  context = {
+    "commentid": id,
+    "lognameOwnsThis": True,
+    "owner": logname,
+    "text": text,
+    "url": f"/api/v1/comments/{id}/"
+  }
+
+  return flask.jsonify(**context), 201
+
+
+@insta485.app.route('/api/v1/comments/<int:commentid>/',  methods=['DELETE'])
+def delete_comment(commentid):
+    
+    logname = authentication()
+    connection = insta485.model.get_db()
+
+    cur = connection.execute(
+      "SELECT commentid, owner "
+      "FROM comments "
+      "WHERE commentid = ?",
+      (commentid,)
+    )
+
+    comment = cur.fetchall()
+    
+    if len(comment) == 0:
+      flask.abort(404)
+    
+
+    if comment[0]['owner'] != logname:
+      flask.abort(403)
+
+    connection.execute(
+      "DELETE FROM comments WHERE commentid = ?",
+      (commentid,)
+    )
+
+    
+    return flask.jsonify({}), 204
