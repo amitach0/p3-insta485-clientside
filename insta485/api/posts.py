@@ -56,47 +56,86 @@ def get_api():
 def get_posts():
   """Return the 10 newest posts."""
 
-  # HTTP Basic Access Authentication  
-  #logname = flask.request.authorization['username']
-  #password = flask.request.authorization['password']
-
   logname = authentication()
   connection = insta485.model.get_db()
   
-  cur = connection.execute(
-    "SELECT postid, owner, owner_img_url, img_url, timestamp "
-    "FROM ("
-    "SELECT P.postid, U.username AS owner, U.filename AS "
-    "owner_img_url, P.filename as img_url, P.created AS "
-    "timestamp "
-    "FROM users U "
-    "INNER JOIN posts P ON U.username = P.owner "
-    "WHERE U.username = ? "
-    "GROUP BY P.postid, U.username, U.filename, P.filename, P.created "
-    "UNION "
-    "SELECT P.postid, F.username2 AS owner, U2.filename as "
-    "owner_img_url, P.filename as img_url, "
-    "P.created AS timestamp "
-    "FROM users U "
-    "INNER JOIN following F ON U.username = F.username1 "
-    "INNER JOIN users U2 ON F.username2 = U2.username "
-    "INNER JOIN posts P ON F.username2 = P.owner "
-    "WHERE U.username = ? "
-    "GROUP BY P.postid, F.username2, "
-    "U2.filename, P.filename, P.created) "
-    "ORDER BY timestamp, postid DESC ",
-    "LIMIT 10 ", # Test if this actually restrains to first 10
-    (logname, logname)
-  )
+  # Pagination
+  size = flask.request.args.get("size", default=10, type=int)
+  page = flask.request.args.get("page", default=0, type=int)
+  postid_lte = flask.request.args.get('postid_lte')
+
+  # No postid_lte passed
+  if postid_lte is None:
+    cur = connection.execute(
+      "SELECT postid, owner, owner_img_url, img_url, timestamp "
+      "FROM ("
+      "SELECT P.postid, U.username AS owner, U.filename AS "
+      "owner_img_url, P.filename as img_url, P.created AS "
+      "timestamp "
+      "FROM users U "
+      "INNER JOIN posts P ON U.username = P.owner "
+      "WHERE U.username = ? "
+      "GROUP BY P.postid, U.username, U.filename, P.filename, P.created "
+      "UNION "
+      "SELECT P.postid, F.username2 AS owner, U2.filename as "
+      "owner_img_url, P.filename as img_url, "
+      "P.created AS timestamp "
+      "FROM users U "
+      "INNER JOIN following F ON U.username = F.username1 "
+      "INNER JOIN users U2 ON F.username2 = U2.username "
+      "INNER JOIN posts P ON F.username2 = P.owner "
+      "WHERE U.username = ? "
+      "GROUP BY P.postid, F.username2, "
+      "U2.filename, P.filename, P.created) "
+      "ORDER BY timestamp, postid DESC ",
+      (logname, logname)
+    )
+
+  # postid_lte passed
+  else:
+    cur = connection.execute(
+      "SELECT postid, owner, owner_img_url, img_url, timestamp "
+      "FROM ("
+      "SELECT P.postid, U.username AS owner, U.filename AS "
+      "owner_img_url, P.filename as img_url, P.created AS "
+      "timestamp "
+      "FROM users U "
+      "INNER JOIN posts P ON U.username = P.owner "
+      "WHERE U.username = ? "
+      "GROUP BY P.postid, U.username, U.filename, P.filename, P.created "
+      "UNION "
+      "SELECT P.postid, F.username2 AS owner, U2.filename as "
+      "owner_img_url, P.filename as img_url, "
+      "P.created AS timestamp "
+      "FROM users U "
+      "INNER JOIN following F ON U.username = F.username1 "
+      "INNER JOIN users U2 ON F.username2 = U2.username "
+      "INNER JOIN posts P ON F.username2 = P.owner "
+      "WHERE U.username = ? "
+      "GROUP BY P.postid, F.username2, "
+      "U2.filename, P.filename, P.created) "
+      "ORDER BY timestamp, postid DESC ",
+      (logname, logname)
+    )
   postids = cur.fetchall()
+  # NEED TO FIGURE OUT HOW DIVVY POSTS UP BETWEEN PAGES
+  if postid_lte is None:
+    postid_lte = max(postids, key=lambda x:x['postid'])['postid']
   
-  context = {"next": "", "results": []}
-  print("DEBUG:", postids)
+  if len(postids) <= size:
+    context = {"next": "", "results": []}
+  else:
+    context = {"next": "/api/v1/posts/?size={}&page={}&postid_lte={}".format(size, page+1, postid_lte), "results": []}
+  
   for post in postids:
     curr_post = {'postid': post['postid'], 'url': '/api/v1/posts/{}/'.format(int(post['postid']))}
-    context['results'].append(curr_post)
+
+    if curr_post['postid'] <= int(postid_lte) and postids.index(post) > (size * page):
+      if len(context['results']) < size:
+        context['results'].append(curr_post)
   
-  context['url'] = '/api/v1/posts/'
+  context['url'] = flask.request.url.split("8000",1)[1]
+
   return flask.jsonify(**context)
 
 
@@ -106,9 +145,6 @@ def get_post(postid_url_slug):
 
     logname = authentication()
     connection = insta485.model.get_db()
-
-    #logname = flask.request.authorization['username']
-    #password = flask.request.authorization['password']
 
     cur = connection.execute(
       "SELECT commentid, owner, text "
@@ -155,9 +191,9 @@ def get_post(postid_url_slug):
     # Get total number of likes
     cur = connection.execute(
       "SELECT COUNT(*) "
-    "FROM likes "
-    "WHERE postid = ? ",
-    (postid_url_slug,)
+      "FROM likes "
+      "WHERE postid = ? ",
+      (postid_url_slug,)
     )
     num_likes = cur.fetchall()
     if len(likeid) != 0:
