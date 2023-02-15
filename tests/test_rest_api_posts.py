@@ -463,7 +463,6 @@ def test_posts_pagination_upload_between_requests(client):
         "url": "/api/v1/posts/?size=10&page=1&postid_lte=14"
     }
 
-
 def test_posts_pagination_errors(client):
     """Verify pagination error conditions.
 
