@@ -49,3 +49,5 @@ export default function Post({ url }) {
 Post.propTypes = {
   url: PropTypes.string.isRequired,
 };
+
+//function Timestamp({ url }) {}
