@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 export default function Comment({ comments }) {
   const commentsList = comments.map((comment) => (
     <p>
-      {comment.owner} {comment.text}
+      <b>{comment.owner}</b> {comment.text}
     </p>
   ));
 

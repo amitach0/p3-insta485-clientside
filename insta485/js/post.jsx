@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import Likes from "./likes.jsx";
 import Comment from "./comments.jsx";
+import "moment";
 
 // The parameter of this function is an object with a string called url inside it.
 // url is a prop for the Post component.
@@ -10,6 +11,8 @@ export default function Post({ url }) {
 
   const [imgUrl, setImgUrl] = useState("");
   const [owner, setOwner] = useState("");
+  const [ownerShowUrl, setOwnerShowUrl] = useState("");
+  const [ownerImgUrl, setOwnerImgUrl] = useState("");
   const [numLikes, setLikes] = useState(69);
   const [comments, setComments] = useState([]);
 
@@ -31,6 +34,8 @@ export default function Post({ url }) {
           setOwner(data.owner);
           setLikes(data.likes["numLikes"]);
           setComments(data.comments);
+          setOwnerShowUrl(data.ownerShowUrl);
+          setOwnerImgUrl(data.ownerImgUrl);
         }
       })
       .catch((error) => console.log(error));
@@ -46,8 +51,15 @@ export default function Post({ url }) {
   // Render post image and post owner
   return (
     <div className="post">
+      <h3>
+        <a href={ownerShowUrl}>
+          <img src={ownerImgUrl} alt="profile_image" />
+        </a>
+        <a href={ownerShowUrl}>
+          <b>{owner}</b>
+        </a>
+      </h3>
       <img src={imgUrl} alt="post_image" />
-      <p>{owner}</p>
       <Likes numLikes={numLikes} />
       <Comment comments={comments} />
     </div>
