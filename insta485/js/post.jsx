@@ -13,7 +13,9 @@ export default function Post({ url }) {
   const [owner, setOwner] = useState("");
   const [ownerShowUrl, setOwnerShowUrl] = useState("");
   const [ownerImgUrl, setOwnerImgUrl] = useState("");
-  const [numLikes, setLikes] = useState(69);
+  const [numLikes, setLikes] = useState("");
+  const [lognamelikes, setlognameLikes] = useState("");
+  const [likeUrl, setLikesUrl] = useState("");
   const [comments, setComments] = useState([]);
   const [created, setCreated] = useState("");
   const [postUrl, setPostUrl] = useState("");
@@ -35,6 +37,8 @@ export default function Post({ url }) {
           setImgUrl(data.imgUrl);
           setOwner(data.owner);
           setLikes(data.likes["numLikes"]);
+          setlognameLikes(data.likes["lognameLikesThis"]);
+          setLikesUrl(data.likes["url"]);
           setComments(data.comments);
           setOwnerShowUrl(data.ownerShowUrl);
           setOwnerImgUrl(data.ownerImgUrl);
@@ -67,7 +71,7 @@ export default function Post({ url }) {
         <a href={postUrl}>{moment.utc(created).fromNow()}</a>
       </h3>
       <img src={imgUrl} alt="post_image" />
-      <Likes numLikes={numLikes} />
+      <Likes numLikes={numLikes} lognamelikes={lognamelikes} url={likeUrl} />
       <Comment comments={comments} />
     </div>
   );
