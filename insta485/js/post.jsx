@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import Likes from "./likes.jsx";
 import Comment from "./comments.jsx";
-import "moment";
+import moment from "moment";
 
 // The parameter of this function is an object with a string called url inside it.
 // url is a prop for the Post component.
@@ -15,6 +15,8 @@ export default function Post({ url }) {
   const [ownerImgUrl, setOwnerImgUrl] = useState("");
   const [numLikes, setLikes] = useState(69);
   const [comments, setComments] = useState([]);
+  const [created, setCreated] = useState("");
+  const [postUrl, setPostUrl] = useState("");
 
   useEffect(() => {
     // Declare a boolean flag that we can use to cancel the API request.
@@ -36,6 +38,8 @@ export default function Post({ url }) {
           setComments(data.comments);
           setOwnerShowUrl(data.ownerShowUrl);
           setOwnerImgUrl(data.ownerImgUrl);
+          setCreated(data.created);
+          setPostUrl(data.postShowUrl);
         }
       })
       .catch((error) => console.log(error));
@@ -58,6 +62,9 @@ export default function Post({ url }) {
         <a href={ownerShowUrl}>
           <b>{owner}</b>
         </a>
+      </h3>
+      <h3>
+        <a href={postUrl}>{moment.utc(created).fromNow()}</a>
       </h3>
       <img src={imgUrl} alt="post_image" />
       <Likes numLikes={numLikes} />

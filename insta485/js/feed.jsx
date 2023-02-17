@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Post from "./post.jsx";
+import PropTypes from "prop-types";
 
 export default function Feed({ url }) {
   const [results, setResults] = useState([]);
@@ -41,3 +42,7 @@ export default function Feed({ url }) {
     </div>
   );
 }
+
+Feed.propTypes = {
+  url: PropTypes.string.isRequired,
+};
