@@ -13,5 +13,5 @@ export default function Likes({ numLikes }) {
 }
 
 Likes.propTypes = {
-  numLikes: PropTypes.string.isRequired,
+  numLikes: PropTypes.number.isRequired,
 };
