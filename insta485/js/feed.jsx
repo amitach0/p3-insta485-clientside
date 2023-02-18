@@ -64,7 +64,9 @@ export default function Feed({ url }) {
   //console.log(results);
 
   const postsList = results.map((post) => (
-    <Post url={post["url"]} key={post["url"]} />
+    <div key={post["url"]}>
+      <Post url={post["url"]} />
+    </div>
   ));
 
   return (
@@ -79,19 +81,4 @@ export default function Feed({ url }) {
       </InfiniteScroll>
     </div>
   );
-
-  /*
-
-
- return (
-
-    <div className="feed">
-      <ul>{postsList}</ul>
-    </div>
-  );
-  */
 }
-
-Feed.propTypes = {
-  url: PropTypes.string.isRequired,
-};

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import LikesButton from "./likes.jsx";
-import Comment from "./comments.jsx";
+import CommentButton from "./comments.jsx";
 import moment from "moment";
 //import UnlikeButton from "./unlikebutton.jsx";
 
@@ -90,12 +90,12 @@ export default function Post({ url }) {
 
   const handleChange = (event) => {
     setTextEntry(event.target.value);
-    console.log(event.target.value);
+    //console.log(event.target.value);
   };
 
   function handleComment(e) {
-    console.log(e);
-    console.log(e.target.action);
+    //console.log(e);
+    //console.log(e.target.action);
 
     let ignoreStaleRequest = false;
     // Call REST API to get the post's information
@@ -143,6 +143,32 @@ export default function Post({ url }) {
     };
   }
 
+  function deleteComment(url) {
+    let ignoreStaleRequest = false;
+    fetch(url, { method: "DELETE" }, { credentials: "same-origin" })
+      .then((response) => {
+        if (!response.ok) throw Error(response.statusText);
+        //return response.json();
+      })
+      .then(() => {
+        // If ignoreStaleRequest was set to true, we want to ignore the results of the
+        // the request. Otherwise, update the state to trigger a new render.
+        if (!ignoreStaleRequest) {
+          setComments((prevVal) => {
+            return prevVal.filter((comment) => comment.url != url);
+          });
+          //setCommentUrl(null);
+        }
+      })
+      .catch((error) => console.log(error));
+    return () => {
+      // This is a cleanup function that runs whenever the Post component
+      // unmounts or re-renders. If a Post is about to unmount or re-render, we
+      // should avoid updating state.
+      ignoreStaleRequest = true;
+    };
+  }
+
   useEffect(() => {
     // Declare a boolean flag that we can use to cancel the API request.
     let ignoreStaleRequest = false;
@@ -181,8 +207,17 @@ export default function Post({ url }) {
   }, [url]);
 
   const commentsList = comments.map((comment) => (
-    <p key={comment.commentid}>
-      <b>{comment.owner}</b> {comment.text}
+    <p key={comment.url}>
+      <a href={comment.ownerShowUrl}>{comment.owner}</a> {comment.text}{" "}
+      {comment.lognameOwnsThis ? (
+        <CommentButton
+          clickHandler={() => {
+            deleteComment(comment.url);
+          }}
+        />
+      ) : (
+        ""
+      )}
     </p>
   ));
 

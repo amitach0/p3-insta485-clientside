@@ -1,21 +1,15 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
-export default function Comment({ props }) {
+export default function CommentButton(props) {
   return (
-    <div className="comment">
-      <form
-        className="comment-form"
-        onSubmit={() => {
-          props.clickHandler();
-        }}
-      >
-        <input type="text" value="hello" />
-      </form>
-    </div>
+    <button
+      className="delete-comment-button"
+      onClick={() => {
+        props.clickHandler();
+      }}
+    >
+      delete
+    </button>
   );
 }
-
-Comment.propTypes = {
-  comments: PropTypes.array.isRequired,
-};
