@@ -181,7 +181,7 @@ export default function Post({ url }) {
   }, [url]);
 
   const commentsList = comments.map((comment) => (
-    <p>
+    <p key={comment.commentid}>
       <b>{comment.owner}</b> {comment.text}
     </p>
   ));

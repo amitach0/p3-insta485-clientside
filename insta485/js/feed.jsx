@@ -63,7 +63,9 @@ export default function Feed({ url }) {
 
   //console.log(results);
 
-  const postsList = results.map((post) => <Post url={post["url"]} />);
+  const postsList = results.map((post) => (
+    <Post url={post["url"]} key={post["url"]} />
+  ));
 
   return (
     <div className="feed">
@@ -73,14 +75,7 @@ export default function Feed({ url }) {
         hasMore={true}
         loader={<h4>Loading...</h4>}
       >
-        <ol>
-          <div>
-            {results.length > 0 &&
-              results.map((result) => (
-                <Post url={result.url} key={result.url} />
-              ))}
-          </div>
-        </ol>
+        <span>{postsList}</span>
       </InfiniteScroll>
     </div>
   );
