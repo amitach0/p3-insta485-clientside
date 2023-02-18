@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 
-export default function Comment({ comments }) {
-  const commentsList = comments.map((comment) => (
-    <p>
-      <b>{comment.owner}</b> {comment.text}
-    </p>
-  ));
-
+export default function Comment({ props }) {
   return (
     <div className="comment">
-      <ul>{commentsList}</ul>
+      <form
+        className="comment-form"
+        onSubmit={() => {
+          props.clickHandler();
+        }}
+      >
+        <input type="text" name="text" />
+      </form>
     </div>
   );
 }
