@@ -93,6 +93,14 @@ export default function Post({ url }) {
     //console.log(event.target.value);
   };
 
+  const doubleclick = () => {
+    console.log("attempt");
+    console.log(lognamelikes);
+    if (!lognamelikes) {
+      like();
+    }
+  };
+
   function handleComment(e) {
     //console.log(e);
     //console.log(e.target.action);
@@ -236,7 +244,11 @@ export default function Post({ url }) {
         <h3>
           <a href={postUrl}>{moment.utc(created).fromNow()}</a>
         </h3>
-        <img src={imgUrl} alt="post_image" />
+        <img
+          onDoubleClick={() => doubleclick()}
+          src={imgUrl}
+          alt="post_image"
+        />
         <p>
           {lognamelikes == true ? (
             <LikesButton
