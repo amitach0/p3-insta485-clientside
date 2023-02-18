@@ -185,7 +185,6 @@ export default function Post({ url }) {
       <b>{comment.owner}</b> {comment.text}
     </p>
   ));
-  console.log(comments);
 
   // Render post image and post owner
   return (

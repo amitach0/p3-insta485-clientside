@@ -78,7 +78,7 @@ case $1 in
       # Use '${SHUF}' instead of 'shuf'
       FILENAME=`echo "$FILENAMES" | ${SHUF} -n1 | awk '{$1=$1;print}'`
       OWNER="awdeorio"
-      sqlite3 -echo -batch ${DB_FILENAME} "INSERT INTO posts(filename, owner) VALUES('${FILENAME}','${OWNER}');"
+      sqlite3 -echo -batch ${DB_FILENAME} "INSERT INTO posts(filename, owner, created) VALUES('${FILENAME}','${OWNER}', CURRENT_TIMESTAMP);"
     done
     ;;
   *)

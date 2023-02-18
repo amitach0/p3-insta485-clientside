@@ -1,13 +1,17 @@
 import PropTypes from "prop-types";
 import React, { useState, useEffect } from "react";
 
-
 export default function LikesButton(props) {
   return (
-    <button onClick={() => {props.clickHandler()}}>
-     {props.name}
+    <button
+      className="like-unlike-button"
+      onClick={() => {
+        props.clickHandler();
+      }}
+    >
+      {props.name}
     </button>
- );
+  );
 
   /*const [lognameLikesThis, setLognameLikesThis] = useState(lognamelikes);
   const [likesNum, setLikes] = useState(numLikes);
