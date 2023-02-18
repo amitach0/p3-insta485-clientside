@@ -222,50 +222,56 @@ export default function Post({ url }) {
   ));
 
   // Render post image and post owner
-  return (
-    <div className="post">
-      <h3>
-        <a href={ownerShowUrl}>
-          <img src={ownerImgUrl} alt="profile_image" />
-        </a>
-        <a href={ownerShowUrl}>
-          <b>{owner}</b>
-        </a>
-      </h3>
-      <h3>
-        <a href={postUrl}>{moment.utc(created).fromNow()}</a>
-      </h3>
-      <img src={imgUrl} alt="post_image" />
-      {lognamelikes == true ? (
-        <LikesButton
-          clickHandler={() => {
-            unlike();
-          }}
-          name="unlike"
-        />
-      ) : (
-        <LikesButton
-          clickHandler={() => {
-            like();
-          }}
-          name="like"
-        />
-      )}
-      <p>
-        {numLikes} {numLikes == 1 ? "like" : "likes"}
-      </p>
+  if (imgUrl != "") {
+    return (
+      <div className="post">
+        <h3>
+          <a href={ownerShowUrl}>
+            <img src={ownerImgUrl} alt="profile_image" />
+          </a>
+          <a href={ownerShowUrl}>
+            <b>{owner}</b>
+          </a>
+        </h3>
+        <h3>
+          <a href={postUrl}>{moment.utc(created).fromNow()}</a>
+        </h3>
+        <img src={imgUrl} alt="post_image" />
+        <p>
+          {lognamelikes == true ? (
+            <LikesButton
+              clickHandler={() => {
+                unlike();
+              }}
+              name="unlike"
+            />
+          ) : (
+            <LikesButton
+              clickHandler={() => {
+                like();
+              }}
+              name="like"
+            />
+          )}
+        </p>
+        <p>
+          {numLikes} {numLikes == 1 ? "like" : "likes"}
+        </p>
 
-      <span className="comment-text">{commentsList}</span>
-      <form className="comment-form" onSubmit={handleComment}>
-        <input
-          type="text"
-          name="text"
-          value={textEntry}
-          onChange={handleChange}
-        />
-      </form>
-    </div>
-  );
+        <span className="comment-text">{commentsList}</span>
+        <form className="comment-form" onSubmit={handleComment}>
+          <input
+            type="text"
+            name="text"
+            value={textEntry}
+            onChange={handleChange}
+          />
+        </form>
+      </div>
+    );
+  } else {
+    return <div>Loading...</div>;
+  }
 }
 
 Post.propTypes = {

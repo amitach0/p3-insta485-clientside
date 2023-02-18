@@ -45,15 +45,16 @@ export default function Feed({ url }) {
       ignoreStaleRequest = true;
     };
   }, [url]);
+
   const fetchMore = () => {
-    console.log(url);
-    fetch(url, { credentials: "same-origin" })
+    console.log(next);
+    fetch(next, { credentials: "same-origin" })
       .then((response) => {
         if (!response.ok) throw Error(response.statusText);
         return response.json();
       })
       .then((data) => {
-        setResults([...data.results, ...data.next]);
+        setResults([...results, ...data.results]);
 
         //spread operator
         // add new posts
@@ -64,9 +65,7 @@ export default function Feed({ url }) {
   //console.log(results);
 
   const postsList = results.map((post) => (
-    <div key={post["url"]}>
-      <Post url={post["url"]} />
-    </div>
+    <Post url={post.url} key={post.url} />
   ));
 
   return (
