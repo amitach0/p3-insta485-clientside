@@ -10,7 +10,7 @@ export default function Comment({ props }) {
           props.clickHandler();
         }}
       >
-        <input type="text" name="text" />
+        <input type="text" value="hello" />
       </form>
     </div>
   );

@@ -329,6 +329,7 @@ def post_comment():
     context = {
       "commentid": id,
       "lognameOwnsThis": True,
+      "ownerShowUrl": f"/users/{logname}/",
       "owner": logname,
       "text": text,
       "url": f"/api/v1/comments/{id}/"

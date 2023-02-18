@@ -88,15 +88,14 @@ export default function Post({ url }) {
     };
   }
 
-  const handleSubmit = (event) => {
-    //setName(textEntry);
-    //prevents website from refreshing (default action of form submission)
-    event.preventDefault();
+  const handleChange = (event) => {
+    setTextEntry(event.target.value);
+    console.log(event.target.value);
   };
 
   function handleComment(e) {
     console.log(e);
-    e.preventDefault();
+    console.log(e.target.action);
 
     let ignoreStaleRequest = false;
     // Call REST API to get the post's information
@@ -107,8 +106,8 @@ export default function Post({ url }) {
       url,
       {
         method: "POST",
-        headers: { "Content-Type": "applications/json" },
-        body: JSON.stringify({ text: e.target.value }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: textEntry }),
       },
       { credentials: "same-origin" }
     )
@@ -120,15 +119,21 @@ export default function Post({ url }) {
         // If ignoreStaleRequest was set to true, we want to ignore the results of the
         // the request. Otherwise, update the state to trigger a new render.
         if (!ignoreStaleRequest) {
-          const newComment = (
+          /*const newComment = (
             <p>
-              <b>{owner}</b> {e.target.value}
+              <b>{owner}</b> {textEntry}
             </p>
           );
-          commentsList([...commentsList, ...newComment]);
+          commentsList([...commentsList, ...newComment]);*/
+          setComments((prevVal) => {
+            return prevVal.concat(data);
+          });
         }
       })
       .catch((error) => console.log(error));
+
+    setTextEntry("");
+    e.preventDefault();
 
     return () => {
       // This is a cleanup function that runs whenever the Post component
@@ -180,6 +185,7 @@ export default function Post({ url }) {
       <b>{comment.owner}</b> {comment.text}
     </p>
   ));
+  console.log(comments);
 
   // Render post image and post owner
   return (
@@ -217,7 +223,12 @@ export default function Post({ url }) {
 
       <span className="comment-text">{commentsList}</span>
       <form className="comment-form" onSubmit={handleComment}>
-        <input type="text" name="text" />
+        <input
+          type="text"
+          name="text"
+          value={textEntry}
+          onChange={handleChange}
+        />
       </form>
     </div>
   );
