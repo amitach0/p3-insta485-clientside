@@ -1,0 +1,22 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0*   Trying 3.95.32.22...
+* TCP_NODELAY set
+* Connected to ec2-3-95-32-22.compute-1.amazonaws.com (3.95.32.22) port 80 (#0)
+> GET / HTTP/1.1
+> Host: ec2-3-95-32-22.compute-1.amazonaws.com
+> User-Agent: curl/7.54.0
+> Accept: */*
+> Cookie: login=eyJ1c2VybmFtZSI6ImF3ZGVvcmlvIn0.Y_Gk2Q.I8QYcwPitqrLiQfj3qhsyCqPzCo
+> 
+< HTTP/1.1 200 OK
+< Server: nginx/1.18.0 (Ubuntu)
+< Date: Sun, 19 Feb 2023 04:26:04 GMT
+< Content-Type: text/html; charset=utf-8
+< Content-Length: 395
+< Connection: keep-alive
+< Vary: Cookie
+< 
+{ [395 bytes data]
+100   395  100   395    0     0   4727      0 --:--:-- --:--:-- --:--:--  4759
+* Connection #0 to host ec2-3-95-32-22.compute-1.amazonaws.com left intact
