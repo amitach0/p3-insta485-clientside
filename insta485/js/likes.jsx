@@ -1,19 +1,21 @@
 import PropTypes from "prop-types";
-import React, { useState, useEffect } from "react";
+import React from "react";
 
-export default function LikesButton(props) {
+export default function LikesButton({ name, clickHandler }) {
+  // const { name } = props;
   return (
-    <button
-      className="like-unlike-button"
-      onClick={() => {
-        props.clickHandler();
-      }}
-    >
-      {props.name}
+    <button type="button" className="like-unlike-button" onClick={clickHandler}>
+      {name}
     </button>
   );
+}
 
-  /*const [lognameLikesThis, setLognameLikesThis] = useState(lognamelikes);
+LikesButton.propTypes = {
+  clickHandler: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
+};
+
+/* const [lognameLikesThis, setLognameLikesThis] = useState(lognamelikes);
   const [likesNum, setLikes] = useState(numLikes);
   console.log(lognameLikesThis)
 
@@ -71,8 +73,7 @@ export default function LikesButton(props) {
     <div className="likes">
       <p>{numLikes} likes</p>
     </div>
-  );*/
-}
+  ); */
 
 /*
 Likes.propTypes = {

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import LikesButton from "./likes.jsx";
-import CommentButton from "./comments.jsx";
 import moment from "moment";
-//import UnlikeButton from "./unlikebutton.jsx";
+import LikesButton from "./likes";
+import CommentButton from "./comments";
 
 // The parameter of this function is an object with a string called url inside it.
 // url is a prop for the Post component.
@@ -24,7 +23,6 @@ export default function Post({ url }) {
   const [textEntry, setTextEntry] = useState("");
 
   function unlike() {
-    //useEffect(() => {
     // Declare a boolean flag that we can use to cancel the API request.
     let ignoreStaleRequest = false;
     // Call REST API to get the post's information
@@ -32,17 +30,15 @@ export default function Post({ url }) {
     fetch(likeUrl, { method: "DELETE" }, { credentials: "same-origin" })
       .then((response) => {
         if (!response.ok) throw Error(response.statusText);
-        //return response.json();
+        // return response.json();
       })
       .then(() => {
         // If ignoreStaleRequest was set to true, we want to ignore the results of the
         // the request. Otherwise, update the state to trigger a new render.
         if (!ignoreStaleRequest) {
           setlognameLikes(false);
-          setLikes((prevVal) => {
-            return prevVal - 1;
-          });
           setLikesUrl(null);
+          setLikes((prevVal) => prevVal - 1);
         }
       })
       .catch((error) => console.log(error));
@@ -53,16 +49,16 @@ export default function Post({ url }) {
       // should avoid updating state.
       ignoreStaleRequest = true;
     };
-    //}, [likeUrl]);
+    // }, [likeUrl]);
   }
 
   function like() {
     let ignoreStaleRequest = false;
     // Call REST API to get the post's information
 
-    let url = "/api/v1/likes/?postid=" + postId;
+    const likesUrl = `/api/v1/likes/?postid=${postId}`;
 
-    fetch(url, { method: "POST" }, { credentials: "same-origin" })
+    fetch(likesUrl, { method: "POST" }, { credentials: "same-origin" })
       .then((response) => {
         if (!response.ok) throw Error(response.statusText);
         return response.json();
@@ -72,9 +68,7 @@ export default function Post({ url }) {
         // the request. Otherwise, update the state to trigger a new render.
         if (!ignoreStaleRequest) {
           setlognameLikes(true);
-          setLikes((prevVal) => {
-            return prevVal + 1;
-          });
+          setLikes((prevVal) => prevVal + 1);
           setLikesUrl(data.url);
         }
       })
@@ -90,7 +84,7 @@ export default function Post({ url }) {
 
   const handleChange = (event) => {
     setTextEntry(event.target.value);
-    //console.log(event.target.value);
+    // console.log(event.target.value);
   };
 
   const doubleclick = () => {
@@ -102,16 +96,17 @@ export default function Post({ url }) {
   };
 
   function handleComment(e) {
-    //console.log(e);
-    //console.log(e.target.action);
+    // console.log(e);
+    // console.log(e.target.action);
 
     let ignoreStaleRequest = false;
     // Call REST API to get the post's information
 
-    let url = "/api/v1/comments/?postid=" + postId;
+    // const postUrl = "/api/v1/comments/?postid=" + postId;
+    const commentUrl = `/api/v1/comments/?postid=${postId}`;
 
     fetch(
-      url,
+      commentUrl,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -127,15 +122,13 @@ export default function Post({ url }) {
         // If ignoreStaleRequest was set to true, we want to ignore the results of the
         // the request. Otherwise, update the state to trigger a new render.
         if (!ignoreStaleRequest) {
-          /*const newComment = (
+          /* const newComment = (
             <p>
               <b>{owner}</b> {textEntry}
             </p>
           );
-          commentsList([...commentsList, ...newComment]);*/
-          setComments((prevVal) => {
-            return prevVal.concat(data);
-          });
+          commentsList([...commentsList, ...newComment]); */
+          setComments((prevVal) => prevVal.concat(data));
         }
       })
       .catch((error) => console.log(error));
@@ -151,21 +144,21 @@ export default function Post({ url }) {
     };
   }
 
-  function deleteComment(url) {
+  function deleteComment(deleteUrl) {
     let ignoreStaleRequest = false;
-    fetch(url, { method: "DELETE" }, { credentials: "same-origin" })
+    fetch(deleteUrl, { method: "DELETE" }, { credentials: "same-origin" })
       .then((response) => {
         if (!response.ok) throw Error(response.statusText);
-        //return response.json();
+        // return response.json();
       })
       .then(() => {
         // If ignoreStaleRequest was set to true, we want to ignore the results of the
         // the request. Otherwise, update the state to trigger a new render.
         if (!ignoreStaleRequest) {
-          setComments((prevVal) => {
-            return prevVal.filter((comment) => comment.url != url);
-          });
-          //setCommentUrl(null);
+          setComments((prevVal) =>
+            prevVal.filter((comment) => comment.url !== deleteUrl)
+          );
+          // setCommentUrl(null);
         }
       })
       .catch((error) => console.log(error));
@@ -193,9 +186,9 @@ export default function Post({ url }) {
         if (!ignoreStaleRequest) {
           setImgUrl(data.imgUrl);
           setOwner(data.owner);
-          setLikes(data.likes["numLikes"]);
-          setlognameLikes(data.likes["lognameLikesThis"]);
-          setLikesUrl(data.likes["url"]);
+          setLikes(data.likes.numLikes);
+          setlognameLikes(data.likes.lognameLikesThis);
+          setLikesUrl(data.likes.url);
           setComments(data.comments);
           setOwnerShowUrl(data.ownerShowUrl);
           setOwnerImgUrl(data.ownerImgUrl);
@@ -230,7 +223,7 @@ export default function Post({ url }) {
   ));
 
   // Render post image and post owner
-  if (imgUrl != "") {
+  if (imgUrl !== "") {
     return (
       <div className="post">
         <h3>
@@ -250,7 +243,7 @@ export default function Post({ url }) {
           alt="post_image"
         />
         <p>
-          {lognamelikes == true ? (
+          {lognamelikes === true ? (
             <LikesButton
               clickHandler={() => {
                 unlike();
@@ -267,7 +260,7 @@ export default function Post({ url }) {
           )}
         </p>
         <p>
-          {numLikes} {numLikes == 1 ? "like" : "likes"}
+          {numLikes} {numLikes === 1 ? "like" : "likes"}
         </p>
 
         <span className="comment-text">{commentsList}</span>
@@ -281,8 +274,6 @@ export default function Post({ url }) {
         </form>
       </div>
     );
-  } else {
-    return <div>Loading...</div>;
   }
 }
 

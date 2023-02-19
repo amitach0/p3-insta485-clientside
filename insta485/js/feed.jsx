@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
-import Post from "./post.jsx";
 import InfiniteScroll from "react-infinite-scroll-component";
-//import { render } from "react-dom";
-//import { data } from "cypress/types/jquery/index.js";
-
 import PropTypes from "prop-types";
+import Post from "./post";
 
 export default function Feed({ url }) {
   const [results, setResults] = useState([]);
   const [next, setNext] = useState("");
-
-  // posts, nextUrl,
-
-  //const [next, getNext] = use
 
   useEffect(() => {
     // Declare a boolean flag that we can use to cancel the API request.
@@ -30,10 +23,6 @@ export default function Feed({ url }) {
         if (!ignoreStaleRequest) {
           setResults(data.results);
           setNext(data.next);
-          console.log(data.results);
-          console.log(results);
-          //store url to get next 10
-          //one
         }
       })
       .catch((error) => console.log(error));
@@ -54,18 +43,16 @@ export default function Feed({ url }) {
         return response.json();
       })
       .then((data) => {
+        console.log(results);
+        console.log(data.results);
         setResults([...results, ...data.results]);
-
-        //spread operator
-        // add new posts
+        setNext(data.next);
       })
       .catch((error) => console.log(error));
   };
 
-  //console.log(results);
-
   const postsList = results.map((post) => (
-    <Post url={post.url} key={post.url} />
+    <Post url={post.url} key={post.postid} />
   ));
 
   return (
@@ -73,7 +60,7 @@ export default function Feed({ url }) {
       <InfiniteScroll
         dataLength={results.length}
         next={fetchMore}
-        hasMore={true}
+        hasMore
         loader={<h4>Loading...</h4>}
       >
         <span>{postsList}</span>
@@ -81,3 +68,7 @@ export default function Feed({ url }) {
     </div>
   );
 }
+
+Feed.propTypes = {
+  url: PropTypes.string.isRequired,
+};
